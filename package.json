@@ -1,5 +1,6 @@
 {
   "name": "vendure-pagarme-plugin",
+  "description": "💳 A plugin to enable Pagar.me as a payment provider for Vendure",
   "version": "0.0.0",
   "main": "lib/index.js",
   "files": [
