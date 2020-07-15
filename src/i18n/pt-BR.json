@@ -1,0 +1,172 @@
+{
+  "pagarme-transactions-errors": {
+    "1000": {
+      "title": "Transação não autorizada",
+      "description": ""
+    },
+    "1001": {
+      "title": "Cartão vencido",
+      "description": "Entre em contato com o banco emissor do cartão para solicitar a emissão de um novo"
+    },
+    "1002": {
+      "title": "Transação não permitida",
+      "description": ""
+    },
+    "1003": {
+      "title": "Rejeitado pelo banco emissor",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "1004": {
+      "title": "Cartão com restrição",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "1005": {
+      "title": "Transação não autorizada",
+      "description": ""
+    },
+    "1006": {
+      "title": "Tentativas de senha excedidas",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "1007": {
+      "title": "Rejeitado pelo banco emissor",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "1008": {
+      "title": "Rejeitado pelo banco emissor",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "1009": {
+      "title": "Transação não autorizada",
+      "description": ""
+    },
+    "1010": {
+      "title": "Valor inválido",
+      "description": "Entre em contato com a nossa equipe de atendimento para resolução do problema"
+    },
+    "1011": {
+      "title": "Cartão inválido",
+      "description": "Confira os dados do cartão e tente novamente"
+    },
+    "1013": {
+      "title": "Transação não autorizada",
+      "description": ""
+    },
+    "1014": {
+      "title": "Tipo de cartão inválido",
+      "description": "Só é permitido apenas pagamentos com cartão de credito"
+    },
+    "1016": {
+      "title": "Saldo insuficiente",
+      "description": "Verifique o saldo do seu cartão e tente novamente com outro cartão"
+    },
+    "1017": {
+      "title": "Senha inválida",
+      "description": ""
+    },
+    "1019": {
+      "title": "Transação não permitida",
+      "description": ""
+    },
+    "1020": {
+      "title": "Transação não permitida",
+      "description": ""
+    },
+    "1021": {
+      "title": "Rejeitado pelo banco emissor",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "1022": {
+      "title": "Cartão com restrição",
+      "description": "Entre em contato com o banco emissor do cartão para mais informações"
+    },
+    "1023": {
+      "title": "Rejeitado pelo banco emissor",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "1024": {
+      "title": "Transação não permitida",
+      "description": ""
+    },
+    "1025": {
+      "title": "Cartão bloqueado",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "1042": {
+      "title": "Tipo de conta inválido",
+      "description": "Só é permitido apenas pagamentos com cartão de credito"
+    },
+    "1045": {
+      "title": "Código de segurança inválido",
+      "description": "Corrija o código de segurança (CVV) e tente novamente"
+    },
+    "2000": {
+      "title": "Cartão com restrição",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "2001": {
+      "title": "Cartão vencido",
+      "description": "Entre em contato com o banco emissor do cartão para solicitar a emissão de um novo"
+    },
+    "2002": {
+      "title": "Transação não permitida",
+      "description": ""
+    },
+    "2003": {
+      "title": "Rejeitado pelo banco emissor",
+      "description": "Entre em contato com o banco emissor do cartão"
+    },
+    "2004": {
+      "title": "Cartão com restrição",
+      "description": "Entre em contato com o banco emissor do cartão para mais informações"
+    },
+    "2005": {
+      "title": "Transação não autorizada",
+      "description": ""
+    },
+    "2006": {
+      "title": "Tentativas de senha excedidas",
+      "description": "Entre em contato com o banco emissor do cartão para mais informações"
+    },
+    "2007": {
+      "title": "Cartão com restrição",
+      "description": "Entre em contato com o banco emissor do cartão para mais informações"
+    },
+    "2008": {
+      "title": "Cartão com restrição",
+      "description": "Entre em contato com o banco emissor do cartão para mais informações"
+    },
+    "2009": {
+      "title": "Cartão com restrição",
+      "description": "Entre em contato com o banco emissor do cartão para mais informações"
+    },
+    "9102": {
+      "title": "Transação inválida",
+      "description": "Entre em contato com a nossa equipe de atendimento para mais informações"
+    },
+    "9108": {
+      "title": "Erro no processamento",
+      "description": "Entre em contato com a nossa equipe de atendimento para mais informações"
+    },
+    "9109": {
+      "title": "Erro no processamento",
+      "description": "Entre em contato com a nossa equipe de atendimento para mais informações"
+    },
+    "9111": {
+      "title": "Time-out na transação",
+      "description": "Tente novamente mais tarde"
+    },
+    "9112": {
+      "title": "Emissor indisponível",
+      "description": "Entre em contato com a nossa equipe de atendimento para mais informações"
+    },
+    "9999": {
+      "title": "Erro não especificado",
+      "description": "Entre em contato com a nossa equipe de atendimento para mais informações"
+    },
+    "0000": {
+      "title": "Transação autorizada",
+      "description": ""
+    }
+  }
+}
