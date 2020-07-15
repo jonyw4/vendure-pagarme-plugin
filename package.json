@@ -13,8 +13,8 @@
     "access": "public"
   },
   "scripts": {
-    "watch": "tsc -p ./tsconfig.build.json --watch",
-    "build": "rimraf lib && tsc -p ./tsconfig.build.json",
+    "watch": "tsc --watch",
+    "build": "rimraf lib && tsc",
     "lint": "eslint --ext .ts,.tsx",
     "lint:fix": "eslint --ext .ts,.tsx --fix"
   },

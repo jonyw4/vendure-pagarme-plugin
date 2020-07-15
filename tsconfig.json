@@ -17,6 +17,10 @@
       "newLine": "LF",
       "declaration": true,
       "removeComments": true,
-      "sourceMap": true
-    }
+      "sourceMap": true,
+      "outDir": "./lib"
+    },
+    "include": [
+      "./src/**/*.ts"
+    ]
   }

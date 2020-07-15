@@ -317,7 +317,7 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
     } catch (e) {
       return {
         amount: amount,
-        state: 'Error',
+        state: 'Error' as const,
         errorMessage: e.message
       };
     }
