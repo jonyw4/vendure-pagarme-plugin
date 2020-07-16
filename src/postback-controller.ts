@@ -7,18 +7,24 @@ import {
   ID,
   Order,
   PaymentState,
-  OrderService
+  OrderService,
+  RequestContext,
+  LanguageCode,
+  ChannelService
 } from '@vendure/core';
 import pagarme, { Postback } from 'pagarme';
 import { mapTransactionStatusToPaymentStatus } from './utils';
 import { PaymentStateMachine } from '@vendure/core/dist/service/helpers/payment-state-machine/payment-state-machine';
 
+//TODO: CHECK Application/x-www-form-urlencoded
+//TODO: Tratar postback de um refund
 @Controller('pagarme-postback')
 export class PagarmePostbackController {
   private apiKeyName = 'apiKey';
   private pagarmePaymentMethodHandlerCode = 'pagarme';
   constructor(
     @InjectConnection() private connection: Connection,
+    private channelService: ChannelService,
     private paymentStateMachine: PaymentStateMachine,
     private orderService: OrderService
   ) {}
@@ -48,17 +54,18 @@ export class PagarmePostbackController {
     postback: Postback,
     payment: Payment
   ): Promise<void> {
+    const ctx = await this.createRequestContext();
     const status = mapTransactionStatusToPaymentStatus(postback.current_status);
     if (status !== payment.state) {
       switch (status) {
         case 'Created':
           return await this.handleChangeToCreated();
         case 'Authorized':
-          return await this.handleChangeToAuthorized(payment);
+          return await this.handleChangeToAuthorized(ctx, payment);
         case 'Settled':
-          return await this.handleChangeToSettled(payment);
+          return await this.handleChangeToSettled(ctx, payment);
         case 'Declined':
-          return await this.handleChangeToDeclined(payment);
+          return await this.handleChangeToDeclined(ctx, payment);
         default:
           break;
       }
@@ -68,33 +75,47 @@ export class PagarmePostbackController {
   private async handleChangeToCreated(): Promise<void> {
     return;
   }
-  private async handleChangeToAuthorized(payment: Payment): Promise<void> {
+  private async handleChangeToAuthorized(
+    ctx: RequestContext,
+    payment: Payment
+  ): Promise<void> {
     const order = payment.order;
-    await this.paymentStateMachine.transition({}, order, payment, 'Authorized');
+    await this.paymentStateMachine.transition(
+      ctx,
+      order,
+      payment,
+      'Authorized'
+    );
     if (this.orderTotalIsCovered(order, 'Authorized')) {
       await this.orderService.transitionToState(
-        {},
+        ctx,
         order.id,
         'PaymentAuthorized'
       );
       return;
     }
   }
-  private async handleChangeToSettled(payment: Payment): Promise<void> {
+  private async handleChangeToSettled(
+    ctx: RequestContext,
+    payment: Payment
+  ): Promise<void> {
     const order = payment.order;
-    await this.paymentStateMachine.transition({}, order, payment, 'Settled');
+    await this.paymentStateMachine.transition(ctx, order, payment, 'Settled');
     if (this.orderTotalIsCovered(order, 'Settled')) {
       await this.orderService.transitionToState(
-        {},
+        ctx,
         order.id,
-        'PaymentAuthorized'
+        'PaymentSettled'
       );
       return;
     }
   }
-  private async handleChangeToDeclined(payment: Payment): Promise<void> {
+  private async handleChangeToDeclined(
+    ctx: RequestContext,
+    payment: Payment
+  ): Promise<void> {
     const order = payment.order;
-    await this.paymentStateMachine.transition({}, order, payment, 'Declined');
+    await this.paymentStateMachine.transition(ctx, order, payment, 'Declined');
     // TODO: se for boleto cancela pedido e busca por todas transações com cartão para cancelar
   }
   private async verifySignature(signature: string, postback: Postback) {
@@ -108,6 +129,16 @@ export class PagarmePostbackController {
     ) {
       throw new Error("The request don't have a valid signature");
     }
+  }
+  private async createRequestContext(): Promise<RequestContext> {
+    const channel = await this.channelService.getDefaultChannel();
+    return new RequestContext({
+      apiType: 'admin',
+      isAuthorized: true,
+      authorizedAsOwnerOnly: false,
+      channel,
+      languageCode: LanguageCode.en
+    });
   }
   /**
    * Get a Api Key for Pagar.me from the PaymentMethod in Vendure
