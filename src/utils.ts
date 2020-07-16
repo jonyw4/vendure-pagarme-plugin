@@ -1,4 +1,5 @@
 import type { PaymentState } from '@vendure/core';
+import { RefundState } from '@vendure/core/dist/service/helpers/refund-state-machine/refund-state';
 import type { TransacaoObject } from 'pagarme';
 
 export function mapTransactionStatusToPaymentStatus(
@@ -27,5 +28,22 @@ export function mapTransactionStatusToPaymentStatus(
       return 'Created';
     default:
       return 'Created';
+  }
+}
+
+export function mapTransactionStatusToRefundStatus(
+  status: TransacaoObject['status']
+): RefundState {
+  switch (status) {
+    case 'paid':
+      return 'Settled';
+    case 'refunded':
+      return 'Settled';
+    case 'pending_refund':
+      return 'Pending';
+    case 'refused':
+      return 'Failed';
+    default:
+      return 'Pending';
   }
 }
