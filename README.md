@@ -8,6 +8,15 @@
 ## 🌟 Features
 - A Pagar.me `PaymentMethodHandler` to createPayments
 - A `PagarmePostbackController` controller to receive postback request from Pagar.me
+- Refund credit card payments
+
+## Roadmap
+- Handle refund postback 
+- Add unit and E2E test
+- Cronjob for cancel order after some time
+- A query route in Shop GQL to get transaction information in storefront
+- CRUD for save bank information for refund
+- CRUD for save credit card's ID
 
 ## ⚙️ Install
 ### 1. Install and configure Vendure
