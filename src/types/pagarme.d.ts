@@ -186,6 +186,24 @@ declare module 'pagarme' {
       function update(opts: any, body: any): any;
     }
 
+    namespace postback {
+      function calculateSignature(
+        /** the keys used to sign the hash. */
+        key: string,
+        /** The string to be hashed. */
+        string: string
+      ): string;
+
+      function verifySignature(
+        /** the keys used to sign the hash. */
+        key: string,
+        /** The string to be hashed. */
+        string: string,
+        /** The expected result. */
+        expected: string
+      ): boolean;
+    }
+
     namespace postbacks {
       function find(opts: any, body: any): any;
 
@@ -488,21 +506,23 @@ declare module 'pagarme' {
     | 'no_acquirer'
     | 'acquirer_timeout';
 
+  type TransacaoStatus =
+    | 'processing'
+    | 'authorized'
+    | 'paid'
+    | 'refunded'
+    | 'waiting_payment'
+    | 'pending_refund'
+    | 'refused'
+    | 'chargedback'
+    | 'analyzing'
+    | 'pending_review';
+
   interface TransacaoObject {
     /** Nome do tipo do objeto criado/modificado. */
     object: 'transaction';
     /** Representa o estado da transação. A cada atualização no processamento da transação, esta propriedade é alterada e, caso você esteja usando uma postback_url, os seus servidores são notificados desses updates. */
-    status:
-      | 'processing'
-      | 'authorized'
-      | 'paid'
-      | 'refunded'
-      | 'waiting_payment'
-      | 'pending_refund'
-      | 'refused'
-      | 'chargedback'
-      | 'analyzing'
-      | 'pending_review';
+    status: TransacaoStatus;
     /** Motivo pelo qual a transação foi recusada. */
     refuse_reason?: RefuseStatus;
     /** Agente responsável pela validação ou anulação da transação. */
@@ -585,6 +605,23 @@ declare module 'pagarme' {
     session: string;
     /** Valor único que identifica a transação para permitir uma nova tentativa de requisição com a segurança de que a mesma operação não será executada duas vezes acidentalmente. */
     reference_key: string;
+  }
+
+  export interface Postback {
+    /** ID da transação. */
+    id: number;
+    /** A qual evento o postback se refere.  */
+    event: 'transaction_status_changed' | 'subscription_status_changed';
+    /** Status anterior da transação. */
+    old_status: TransacaoStatus;
+    /** Status ideal para objetos deste tipo, em um fluxo normal, onde autorização e captura são feitos com sucesso, por exemplo. */
+    desired_status: TransacaoStatus;
+    /** 	Status para o qual efetivamente mudou. */
+    current_status: TransacaoStatus;
+    /** Qual o tipo do objeto referido.  */
+    object: 'transaction' | 'subscription';
+    /** Possui todas as informações do objeto.  */
+    transaction: TransacaoObject;
   }
 
   /**
