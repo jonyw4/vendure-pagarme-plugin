@@ -7,6 +7,16 @@
 
 ## 🌟 Features
 - A Pagar.me `PaymentMethodHandler` to createPayments
+- A `PagarmePostbackController` controller to receive postback request from Pagar.me
+- Refund credit card payments
+
+## Roadmap
+- Handle refund postback 
+- Add unit and E2E test
+- Cronjob for cancel order after some time
+- A query route in Shop GQL to get transaction information in storefront
+- CRUD for save bank information for refund
+- CRUD for save credit card's ID
 
 ## ⚙️ Install
 ### 1. Install and configure Vendure
@@ -17,13 +27,13 @@
 npm install vendure-pagarme-plugin --save
 ```
 
-### 3. Add the handler in Vendure configuration
+### 3. Add the plugin in Vendure configuration
 ```typescript
-import { pagarmePaymentMethodHandler } from 'vendure-pagarme-plugin';
+import { PagarmePlugin } from 'vendure-pagarme-plugin';
 const config: VendureConfig = {
   ...
-  paymentOptions: [
-    pagarmePaymentMethodHandler
+  plugins: [
+    PagarmePlugin
   ]
 }
 ```
@@ -35,7 +45,10 @@ To create a payment with this plugin you will need to fill with metadata in `cre
 import { PagarmePaymentMethodMetadata } from 'vendure-pagarme-plugin';
 ```
 
-### 5. Enjoy!
+### 5. Configure Pagar.me
+You will need to enable and configure the options to make work. You can edit this in _Payment Method_ section in Vendure Admin UI
+
+### 6. Enjoy!
 It's done!
 
 ## 😍 Do you like?

@@ -186,6 +186,24 @@ declare module 'pagarme' {
       function update(opts: any, body: any): any;
     }
 
+    namespace postback {
+      function calculateSignature(
+        /** the keys used to sign the hash. */
+        key: string,
+        /** The string to be hashed. */
+        string: string
+      ): string;
+
+      function verifySignature(
+        /** the keys used to sign the hash. */
+        key: string,
+        /** The string to be hashed. */
+        string: string,
+        /** The expected result. */
+        expected: string
+      ): boolean;
+    }
+
     namespace postbacks {
       function find(opts: any, body: any): any;
 
@@ -247,7 +265,10 @@ declare module 'pagarme' {
     }
 
     namespace transactions {
-      function all(opts: any, body: any): any;
+      function all(
+        opts: any,
+        body: TransactionFindAll
+      ): Promise<TransacaoObject[]>;
 
       function calculateInstallmentsAmount(opts: any, body: any): any;
 
@@ -259,9 +280,17 @@ declare module 'pagarme' {
 
       function create(opts: CreateTransacaoInput): Promise<TransacaoObject>;
 
-      function find(opts: any, body: any): any;
+      function find<T extends TransactionFindArgs>(
+        opts: any,
+        body: T
+      ): Promise<
+        T extends TransactionFindAll ? TransacaoObject[] : TransacaoObject
+      >;
 
-      function refund(args: EstornoArgs): Promise<TransacaoObject>;
+      function refund(
+        opts: any,
+        body: TransactionRefundArgs
+      ): Promise<TransacaoObject>;
 
       function reprocess(opts: any, body: any): any;
 
@@ -488,21 +517,23 @@ declare module 'pagarme' {
     | 'no_acquirer'
     | 'acquirer_timeout';
 
+  type TransacaoStatus =
+    | 'processing'
+    | 'authorized'
+    | 'paid'
+    | 'refunded'
+    | 'waiting_payment'
+    | 'pending_refund'
+    | 'refused'
+    | 'chargedback'
+    | 'analyzing'
+    | 'pending_review';
+
   interface TransacaoObject {
     /** Nome do tipo do objeto criado/modificado. */
     object: 'transaction';
     /** Representa o estado da transação. A cada atualização no processamento da transação, esta propriedade é alterada e, caso você esteja usando uma postback_url, os seus servidores são notificados desses updates. */
-    status:
-      | 'processing'
-      | 'authorized'
-      | 'paid'
-      | 'refunded'
-      | 'waiting_payment'
-      | 'pending_refund'
-      | 'refused'
-      | 'chargedback'
-      | 'analyzing'
-      | 'pending_review';
+    status: TransacaoStatus;
     /** Motivo pelo qual a transação foi recusada. */
     refuse_reason?: RefuseStatus;
     /** Agente responsável pela validação ou anulação da transação. */
@@ -586,6 +617,107 @@ declare module 'pagarme' {
     /** Valor único que identifica a transação para permitir uma nova tentativa de requisição com a segurança de que a mesma operação não será executada duas vezes acidentalmente. */
     reference_key: string;
   }
+  // TODO: Atualizar tipagem transaction | subscription
+  export interface Postback {
+    /** ID da transação. */
+    id: number;
+    /** A qual evento o postback se refere.  */
+    event: 'transaction_status_changed' | 'subscription_status_changed';
+    /** Status anterior da transação. */
+    old_status: TransacaoStatus;
+    /** Status ideal para objetos deste tipo, em um fluxo normal, onde autorização e captura são feitos com sucesso, por exemplo. */
+    desired_status: TransacaoStatus;
+    /** Status para o qual efetivamente mudou. */
+    current_status: TransacaoStatus;
+    /** Qual o tipo do objeto referido.  */
+    object: 'transaction' | 'subscription';
+    /** Possui todas as informações do objeto.  */
+    transaction: TransacaoObject;
+  }
+
+  interface TransactionRefundBoletoDataArgs {
+    /** Objeto bank_account que contém os dados da conta bancária para onde o estorno será feito. */
+    bank_account: {
+      /** Dígitos que identificam cada banco. Confira a lista dos bancos aqui: http://www.febraban.org.br/associados/utilitarios/Bancos.asp */
+      bank_code: string;
+      /** Número da agência bancária */
+      agencia: string;
+      /** Dígito verificador da agência. Obrigatório caso o banco o utilize. Apenas números, deve conter somente 1 dígito */
+      agencia_dv: string;
+      /** Número da conta */
+      conta: string;
+      /** Dígito verificador da conta. */
+      conta_dv: string;
+      /** Tipo da conta bancária. */
+      type:
+        | 'conta_corrente'
+        | 'conta_poupanca'
+        | 'conta_corrente_conjunta'
+        | 'conta_poupanca_conjunta';
+      /** CPF ou CNPJ do favorecido */
+      document_number: string;
+      /** Nome/razão social do favorecido, Até 30 caracteres */
+      legal_name: string;
+    };
+  }
+  interface TransactionRefundBoletoWithIdArgs {
+    /** ID da conta bancária. */
+    bank_account_id: string;
+  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface TransactionRefundCreditCardArgs {}
+
+  export interface TransactionRefundDefaultArgs {
+    /** The transaction ID. */
+    id: number;
+    /** Valor desejado para o estorno da transação. Deve ser passado em centavos. Ex: R$ 10.00 = 1000. */
+    amount?: number;
+    /** Define se a operação deve ser feita de maneira assíncrona ou não. Caso true(default), a reposta de sua request será enviada via post para sua postback_url cadastrada na respectiva transação. Caso false, no response será enviado o status final de refunded. */
+    async?: boolean;
+    /** Você pode passar dados adicionais no estorno da transação para facilitar uma futura análise de dados por seus sistemas. */
+    metadata?: string;
+  }
+  export type TransactionRefundDynamicArgs =
+    | TransactionRefundCreditCardArgs
+    | (TransactionRefundBoletoWithIdArgs | TransactionRefundBoletoDataArgs);
+  export type TransactionRefundArgs = TransactionRefundDefaultArgs &
+    TransactionRefundDynamicArgs;
+
+  interface TransactionFindAll {
+    /** Retorna n objetos de transação, com um máximo de 1000 */
+    count?: number;
+    /** Útil para implementação de uma paginação de resultados */
+    page?: number;
+    status?: TransacaoStatus;
+    /** utiliza unixTimeStamp */
+    date_created?: string;
+    /** utiliza unixTimeStamp */
+    date_updated?: string;
+    amount?: string;
+    installments?: string;
+    tid?: string;
+    nsu?: string;
+    card_holder_name?: string;
+    card_last_digits?: string;
+    card_brand?: string;
+    postback_url?: string;
+    payment_method?: string;
+    capture_method?: string;
+    boleto_url?: string;
+    antifraud_score?: string;
+    subscription_id?: string;
+    customer?: Partial<CustomerInput>;
+    address?: Partial<Address>;
+    phone?: PhoneNumber;
+    reference_key?: string;
+    order_id?: string;
+    metadata?: JSON;
+  }
+  interface TransactionFindById {
+    /** The transaction ID. If not sent a transaction list will be returned instead. */
+    id: number;
+  }
+  type TransactionFindArgs = TransactionFindById | TransactionFindAll;
 
   /**
    * -------------------------------------------
@@ -820,10 +952,6 @@ declare module 'pagarme' {
     status?: 'waiting_funds' | 'available' | 'transferred';
     start_date?: number;
     end_date?: number;
-  }
-
-  interface EstornoArgs {
-    id: number;
   }
   enum Country {
     Af = 'AF',
