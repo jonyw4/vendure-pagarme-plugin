@@ -3,9 +3,14 @@ import pagarme, {
   CreateTransacaoCreditCartInput,
   CreateTransacaoBoletoInput,
   CreateTransacaoInputBase
+  // TransactionRefundDefaultArgs,
+  // TransactionRefundDynamicArgs
 } from 'pagarme';
 import type { Unarray, Optional } from './types/utils';
-import { mapTransactionStatusToPaymentStatus } from './utils';
+import {
+  mapTransactionStatusToPaymentStatus,
+  mapTransactionStatusToRefundStatus
+} from './utils';
 
 export type PagarmePaymentMethodMetadata = Omit<
   Optional<CreateTransacaoInputBase, 'amount'>,
@@ -339,6 +344,50 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       return {
         success: false,
         errorMessage: e.message
+      };
+    }
+  },
+  async createRefund(input, total, order, payment, { apiKey, async }) {
+    const pgClient = await pagarme.client.connect({ api_key: apiKey });
+
+    try {
+      let transaction = await pgClient.transactions.find(
+        {},
+        { id: Number(payment.transactionId) }
+      );
+      // TODO: Get bank information from the user
+      // const args: Omit<TransactionRefundDefaultArgs, 'id'> &
+      //   TransactionRefundDynamicArgs = {};
+      // if (transaction.payment_method === 'boleto') {
+      //   // Precisa de todos inputs para criar refund
+      //   args = { bank_account: {} };
+      // }
+
+      if (transaction.payment_method === 'boleto') {
+        throw new Error(
+          'There is not a way to create refund of boleto transactions yet'
+        );
+      }
+
+      transaction = await pgClient.transactions.refund(
+        {},
+        {
+          // ...args,
+          id: Number(payment.transactionId),
+          amount: total,
+          async: async
+        }
+      );
+
+      return {
+        state: mapTransactionStatusToRefundStatus(transaction.status)
+      };
+    } catch (e) {
+      return {
+        state: 'Failed' as const,
+        metadata: {
+          errorMessage: e.message
+        }
       };
     }
   }
