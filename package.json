@@ -19,7 +19,7 @@
     "lint:fix": "eslint --ext .ts,.tsx --fix"
   },
   "peerDependencies": {
-    "@vendure/core": ">=0.13.0"
+    "@vendure/core": ">=0.13.1"
   },
   "dependencies": {
     "pagarme": "4.12.0"
@@ -30,7 +30,7 @@
     "@commitlint/config-conventional": "9.1.1",
     "@typescript-eslint/eslint-plugin": "3.6.1",
     "@typescript-eslint/parser": "3.6.1",
-    "@vendure/core": "0.13.0",
+    "@vendure/core": "0.13.1",
     "eslint": "7.4.0",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-prettier": "3.1.4",
