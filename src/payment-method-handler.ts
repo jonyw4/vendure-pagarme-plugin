@@ -1,19 +1,19 @@
-import { PaymentMethodHandler, LanguageCode, Logger } from '@vendure/core';
+import { PaymentMethodHandler, LanguageCode } from '@vendure/core';
 import pagarme, {
-  CreateTransacaoCreditCartInput,
-  CreateTransacaoBoletoInput,
-  CreateTransacaoInputBase
+  CreateTransactionCreditCartInput,
+  CreateTransactionBoletoInput,
+  CreateTransactionInputBase
   // TransactionRefundDefaultArgs,
   // TransactionRefundDynamicArgs
 } from 'pagarme';
 import type { Unarray, Optional } from './types/utils';
 import {
   mapTransactionStatusToPaymentStatus,
-  mapTransactionStatusToRefundStatus
+  mapPagarmeRefundStatusToVendureRefundStatus
 } from './utils';
 
 export type PagarmePaymentMethodMetadata = Omit<
-  Optional<CreateTransacaoInputBase, 'amount'>,
+  Optional<CreateTransactionInputBase, 'amount'>,
   | 'postback_url'
   | 'async'
   | 'capture'
@@ -28,11 +28,11 @@ export type PagarmePaymentMethodMetadata = Omit<
   | 'reference_key'
   | 'local_time'
 > &
-  (CreateTransacaoCreditCartInput | CreateTransacaoBoletoInput) & {
+  (CreateTransactionCreditCartInput | CreateTransactionBoletoInput) & {
     extraMetadata?: any;
     itemsExtraInfo?: Partial<
       Pick<
-        Unarray<CreateTransacaoInputBase['items']>,
+        Unarray<CreateTransactionInputBase['items']>,
         'venue' | 'tangible' | 'category'
       >
     > &
@@ -351,7 +351,7 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
     const pgClient = await pagarme.client.connect({ api_key: apiKey });
 
     try {
-      let transaction = await pgClient.transactions.find(
+      const transaction = await pgClient.transactions.find(
         {},
         { id: Number(payment.transactionId) }
       );
@@ -369,7 +369,7 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
         );
       }
 
-      transaction = await pgClient.transactions.refund(
+      await pgClient.transactions.refund(
         {},
         {
           // ...args,
@@ -379,8 +379,19 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
         }
       );
 
+      // We need to find  the last refund to get the data of it because in the transaction doesn't return required information
+      const refunds = await pgClient.refunds.find(
+        {},
+        {
+          transaction_id: String(transaction.id)
+        }
+      );
+
+      const refund = refunds[0];
+
       return {
-        state: mapTransactionStatusToRefundStatus(transaction.status)
+        state: mapPagarmeRefundStatusToVendureRefundStatus(refund.status),
+        transactionId: refund.id
       };
     } catch (e) {
       return {
