@@ -22,22 +22,24 @@
     "@vendure/core": ">=0.13.1"
   },
   "dependencies": {
-    "pagarme": "4.12.0"
+    "@types/qs": "6.9.3",
+    "pagarme": "4.12.0",
+    "qs": "6.9.4"
   },
   "devDependencies": {
-    "semantic-release": "17.1.1",
-    "typescript": "3.8.3",
     "@commitlint/config-conventional": "9.1.1",
     "@typescript-eslint/eslint-plugin": "3.6.1",
     "@typescript-eslint/parser": "3.6.1",
     "@vendure/core": "0.13.1",
+    "commitlint": "9.1.0",
     "eslint": "7.4.0",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-prettier": "3.1.4",
     "husky": "4.2.5",
     "prettier": "2.0.5",
     "rimraf": "3.0.2",
-    "commitlint": "9.1.0"
+    "semantic-release": "17.1.1",
+    "typescript": "3.8.3"
   },
   "husky": {
     "hooks": {
