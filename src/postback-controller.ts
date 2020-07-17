@@ -11,12 +11,12 @@ import {
   OrderService,
   RequestContext,
   LanguageCode,
-  ChannelService
+  ChannelService,
+  PaymentMethodService
 } from '@vendure/core';
 import pagarme, { Postback } from 'pagarme';
 import { mapTransactionStatusToPaymentStatus } from './utils';
 import { PaymentStateMachine } from '@vendure/core/dist/service/helpers/payment-state-machine/payment-state-machine';
-import { Refund } from '@vendure/core/dist/entity/refund/refund.entity';
 
 //TODO: CHECK Application/x-www-form-urlencoded
 @Controller('pagarme-postback')
@@ -33,6 +33,7 @@ export class PagarmePostbackController {
     @InjectConnection() private connection: Connection,
     private channelService: ChannelService,
     private paymentStateMachine: PaymentStateMachine,
+    private paymentMethodService: PaymentMethodService,
     private orderService: OrderService
   ) {}
 
@@ -115,11 +116,11 @@ export class PagarmePostbackController {
 
     return payment;
   }
-  /** Handle Refunded Transaction
-   *
+  /**
    * Pagar.me doesn't have a postback for refunded situation. If the transaction postback
    * returns with `refunded` or `paid` we need to check if we have some pending refunds and
-   * confront the result with refunds in Pagar.me and handle with the settle refunds */
+   * confront the result with refunds in Pagar.me and settleRefund manually
+   * */
   private async handleRefundedTransaction(): Promise<void> {
     if (
       this.postback.current_status === 'refunded' ||
@@ -142,22 +143,21 @@ export class PagarmePostbackController {
         }
       );
 
-      /** Update all refunds based on the response from Pagar.me */
+      // Update all refunds based on the response from Pagar.me that are settled
       for (const pgRefund of pgRefunds) {
         const refund = pendingRefunds.find(
           (r) => r.transactionId === pgRefund.id
         );
 
         if (pgRefund.status === 'refunded' && refund) {
-          await this.handleChangeRefundStatusToSettle(refund);
+          await this.orderService.settleRefund(this.ctx, {
+            id: String(refund.id),
+            transactionId: refund.transactionId
+          });
         }
       }
     }
   }
-  /**
-   * Change the status of the refund to settled and all changes that needs to be done if that happens
-   * */
-  private async handleChangeRefundStatusToSettle(refund: Refund) {}
   /**
    * Map all possible changes of status
    */
@@ -218,6 +218,10 @@ export class PagarmePostbackController {
       return;
     }
   }
+
+  /**
+   * If a transaction is declined, we need to check if is boleto to refund all other transactions and cancel the order
+   */
   private async handleChangePaymentToDeclined(): Promise<void> {
     const order = this.payment.order;
     await this.paymentStateMachine.transition(
@@ -226,7 +230,36 @@ export class PagarmePostbackController {
       this.payment,
       'Declined'
     );
-    // TODO: se for boleto cancela pedido e busca por todas transações com cartão para cancelar
+    if (this.postback.transaction.payment_method === 'boleto') {
+      const orderOtherPayments = order.payments.filter(
+        (p) => p.id !== this.payment.id
+      );
+
+      if (orderOtherPayments && orderOtherPayments.length > 0) {
+        for (const payment of orderOtherPayments) {
+          await this.paymentMethodService.createRefund(
+            this.ctx,
+            {
+              paymentId: String(payment.id),
+              lines: [],
+              shipping: 0,
+              adjustment: payment.amount,
+              reason: 'Boleto payment was refused'
+            },
+            order,
+            [],
+            payment
+          );
+          return;
+        }
+      }
+
+      await this.orderService.cancelOrder(this.ctx, {
+        orderId: String(order.id)
+      });
+
+      return;
+    }
   }
   private async createRequestContext(): Promise<RequestContext> {
     const channel = await this.channelService.getDefaultChannel();
