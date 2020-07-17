@@ -1,2 +1,2 @@
 export * from './payment-method-handler';
-export * from './index';
+export * from './plugin';

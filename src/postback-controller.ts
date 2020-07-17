@@ -1,4 +1,4 @@
-import qs from 'qs';
+import { PaymentStateMachine } from '@vendure/core/dist/service/helpers/payment-state-machine/payment-state-machine';
 import { Controller, Body, Headers, Post } from '@nestjs/common';
 import { InjectConnection } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
@@ -15,10 +15,9 @@ import {
   PaymentMethodService
 } from '@vendure/core';
 import pagarme, { Postback } from 'pagarme';
+import qs from 'qs';
 import { mapTransactionStatusToPaymentStatus } from './utils';
-import { PaymentStateMachine } from '@vendure/core/dist/service/helpers/payment-state-machine/payment-state-machine';
 
-//TODO: CHECK Application/x-www-form-urlencoded
 @Controller('pagarme-postback')
 export class PagarmePostbackController {
   /** API Key name in method handler */
