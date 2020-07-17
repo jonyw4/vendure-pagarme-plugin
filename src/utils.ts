@@ -1,9 +1,9 @@
 import type { PaymentState } from '@vendure/core';
 import { RefundState } from '@vendure/core/dist/service/helpers/refund-state-machine/refund-state';
-import type { TransacaoObject } from 'pagarme';
+import type { Transaction, Refund } from 'pagarme';
 
 export function mapTransactionStatusToPaymentStatus(
-  status: TransacaoObject['status']
+  status: Transaction['status']
 ): Exclude<PaymentState, 'Error'> {
   switch (status) {
     case 'processing':
@@ -31,18 +31,14 @@ export function mapTransactionStatusToPaymentStatus(
   }
 }
 
-export function mapTransactionStatusToRefundStatus(
-  status: TransacaoObject['status']
+export function mapPagarmeRefundStatusToVendureRefundStatus(
+  status: Refund['status']
 ): RefundState {
   switch (status) {
-    case 'paid':
-      return 'Settled';
     case 'refunded':
       return 'Settled';
     case 'pending_refund':
       return 'Pending';
-    case 'refused':
-      return 'Failed';
     default:
       return 'Pending';
   }
