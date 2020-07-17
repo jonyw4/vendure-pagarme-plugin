@@ -220,6 +220,11 @@ declare module 'pagarme' {
       function update(opts: UpdateRecebedor): Promise<Recebedor>;
     }
 
+    namespace refunds {
+      function find(opts: any, body: RefundsArgs): Promise<Refund[]>;
+      function cancel(opts: any, body: any): any;
+    }
+
     namespace reprocessedTransactions {
       function find(opts: any, query: any): any;
     }
@@ -265,32 +270,27 @@ declare module 'pagarme' {
     }
 
     namespace transactions {
-      function all(
-        opts: any,
-        body: TransactionFindAll
-      ): Promise<TransacaoObject[]>;
+      function all(opts: any, body: TransactionFindAll): Promise<Transaction[]>;
 
       function calculateInstallmentsAmount(opts: any, body: any): any;
 
-      function capture(opts: CaptureArgs): Promise<TransacaoObject>;
+      function capture(opts: CaptureArgs): Promise<Transaction>;
 
       function cardHashKey(opts: any): any;
 
       function collectPayment(opts: any, body: any): any;
 
-      function create(opts: CreateTransacaoInput): Promise<TransacaoObject>;
+      function create(opts: CreateTransactionInput): Promise<Transaction>;
 
       function find<T extends TransactionFindArgs>(
         opts: any,
         body: T
-      ): Promise<
-        T extends TransactionFindAll ? TransacaoObject[] : TransacaoObject
-      >;
+      ): Promise<T extends TransactionFindAll ? Transaction[] : Transaction>;
 
       function refund(
         opts: any,
         body: TransactionRefundArgs
-      ): Promise<TransacaoObject>;
+      ): Promise<Transaction>;
 
       function reprocess(opts: any, body: any): any;
 
@@ -334,6 +334,40 @@ declare module 'pagarme' {
     namespace zipcodes {
       function find(a0: any, a1: any, ...args: any[]): any;
     }
+  }
+
+  export interface RefundsArgs {
+    /** Filtro pelo ID da transação */
+    transaction_id?: string;
+    /**
+     * Filtro pela data de criação do estorno
+     *
+     * É importante notar que serão retornados apenas os dados referentes a estornos criados à partir de 08/05/2017.
+     * */
+    date_created?: string;
+    /** Filtro pela data de atualização do estorno */
+    date_updated?: string;
+  }
+  export interface Refund {
+    object: 'refund';
+    /** Número identificador do estorno. */
+    id: string;
+    /** Valor, em centavos, do estorno. Exemplo: R$100,00 = 10000 */
+    amount: number;
+    /** Tipo de pagamento da transação estornada. */
+    type: 'credit_card' | 'debit_card' | 'boleto';
+    /** Representa o estado do estorno. */
+    status: 'refunded' | 'pending_refund';
+    /** Número identificador do recebedor responsável pela taxa de processamento. */
+    charge_fee_recipient_id: string;
+    /** Número identificador da conta bancária de destino do estorno. */
+    bank_account_id: number;
+    /** Número identificador da transação estornada. */
+    transaction_id: number;
+    /** Data de criação do estorno no formato ISODate */
+    date_created: string;
+    /** Objeto com dados adicionais informados na criação do estorno. */
+    metadata: JSON;
   }
 
   export interface Address {
@@ -423,7 +457,7 @@ declare module 'pagarme' {
     date?: string;
   }
 
-  export interface CreateTransacaoBoletoInput {
+  export interface CreateTransactionBoletoInput {
     payment_method: 'boleto';
     boleto_fine?: {
       /** Dias após a expiração do boleto quando a multa deve ser cobrada. */
@@ -443,21 +477,21 @@ declare module 'pagarme' {
     boleto_instructions?: string;
   }
 
-  export interface CreateTransacaoCreditCartInputBase {
+  export interface CreateTransactionCreditCartInputBase {
     payment_method: 'credit_card';
   }
 
-  export interface CreateTransacaoCreditCartInputWithHash {
+  export interface CreateTransactionCreditCartInputWithHash {
     /** Informações do cartão do cliente criptografadas em sua aplicação. **OBS: apenas para transações de Cartão de crédito você deve passar o `card_hash` ou `card_id`. Caso inclua os dados do cartão diretamente pelo código, esse campo torna-se dispensável.** */
     card_hash: string;
   }
 
-  export interface CreateTransacaoCreditCartInputWitId {
+  export interface CreateTransactionCreditCartInputWitId {
     /** Ao realizar uma transação, retornamos o card_id do cartão, para que nas próximas transações ele possa ser utilizado como forma de identificar os dados de pagamento. Exemplo de utilização: One-click buy. OBS: apenas para transações de Cartão de crédito você deve passar o card_hash ou card_id. Caso inclua os dados do cartão diretamente pelo código, esse campo torna-se dispensável. */
     card_id: string;
   }
 
-  export interface CreateTransacaoCreditCartInputWitData {
+  export interface CreateTransactionCreditCartInputWitData {
     /** Nome do portador do cartão.  */
     card_holder_name: string;
     /** Data de validade do cartão no formato MMAA. */
@@ -468,13 +502,13 @@ declare module 'pagarme' {
     card_cvv: string;
   }
 
-  export type CreateTransacaoCreditCartInput = CreateTransacaoCreditCartInputBase &
+  export type CreateTransactionCreditCartInput = CreateTransactionCreditCartInputBase &
     (
-      | CreateTransacaoCreditCartInputWithHash
-      | CreateTransacaoCreditCartInputWitId
+      | CreateTransactionCreditCartInputWithHash
+      | CreateTransactionCreditCartInputWitId
     );
 
-  interface CreateTransacaoInputBase {
+  interface CreateTransactionInputBase {
     /** Valor a ser cobrado. Deve ser passado em centavos. Ex: R$ 10.00 = 1000. Deve ser no mínimo 1 real (100) */
     amount: number;
     /** Endpoint do seu sistema que receberá informações a cada atualização da transação. **Caso você defina este parâmetro, o processamento da transação se torna assíncrono.** */
@@ -507,8 +541,8 @@ declare module 'pagarme' {
     local_time?: string;
   }
 
-  export type CreateTransacaoInput = CreateTransacaoInputBase &
-    (CreateTransacaoCreditCartInput | CreateTransacaoBoletoInput);
+  export type CreateTransactionInput = CreateTransactionInputBase &
+    (CreateTransactionCreditCartInput | CreateTransactionBoletoInput);
 
   type RefuseStatus =
     | 'acquirer'
@@ -517,7 +551,7 @@ declare module 'pagarme' {
     | 'no_acquirer'
     | 'acquirer_timeout';
 
-  type TransacaoStatus =
+  type TransactionStatus =
     | 'processing'
     | 'authorized'
     | 'paid'
@@ -529,11 +563,11 @@ declare module 'pagarme' {
     | 'analyzing'
     | 'pending_review';
 
-  interface TransacaoObject {
+  interface Transaction {
     /** Nome do tipo do objeto criado/modificado. */
     object: 'transaction';
     /** Representa o estado da transação. A cada atualização no processamento da transação, esta propriedade é alterada e, caso você esteja usando uma postback_url, os seus servidores são notificados desses updates. */
-    status: TransacaoStatus;
+    status: TransactionStatus;
     /** Motivo pelo qual a transação foi recusada. */
     refuse_reason?: RefuseStatus;
     /** Agente responsável pela validação ou anulação da transação. */
@@ -624,15 +658,15 @@ declare module 'pagarme' {
     /** A qual evento o postback se refere.  */
     event: 'transaction_status_changed' | 'subscription_status_changed';
     /** Status anterior da transação. */
-    old_status: TransacaoStatus;
+    old_status: TransactionStatus;
     /** Status ideal para objetos deste tipo, em um fluxo normal, onde autorização e captura são feitos com sucesso, por exemplo. */
-    desired_status: TransacaoStatus;
+    desired_status: TransactionStatus;
     /** Status para o qual efetivamente mudou. */
-    current_status: TransacaoStatus;
+    current_status: TransactionStatus;
     /** Qual o tipo do objeto referido.  */
     object: 'transaction' | 'subscription';
     /** Possui todas as informações do objeto.  */
-    transaction: TransacaoObject;
+    transaction: Transaction;
   }
 
   interface TransactionRefundBoletoDataArgs {
@@ -688,7 +722,7 @@ declare module 'pagarme' {
     count?: number;
     /** Útil para implementação de uma paginação de resultados */
     page?: number;
-    status?: TransacaoStatus;
+    status?: TransactionStatus;
     /** utiliza unixTimeStamp */
     date_created?: string;
     /** utiliza unixTimeStamp */
