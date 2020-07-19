@@ -1,4 +1,4 @@
-  files:
+files:
   - source: /src/i18n/pt-BR.json
     translation: /src/i18n/%locale%.json
 commit_message: 'fix: new translations %original_file_name% from crowdin [ci skip]'
