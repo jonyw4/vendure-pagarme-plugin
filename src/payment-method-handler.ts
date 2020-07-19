@@ -1,19 +1,24 @@
-import { PaymentMethodHandler, LanguageCode, Logger } from '@vendure/core';
+import {
+  PaymentMethodHandler,
+  LanguageCode,
+  IllegalOperationError,
+  Logger
+} from '@vendure/core';
 import pagarme, {
-  CreateTransacaoCreditCartInput,
-  CreateTransacaoBoletoInput,
-  CreateTransacaoInputBase
+  CreateTransactionCreditCartInput,
+  CreateTransactionBoletoInput,
+  CreateTransactionInputBase
   // TransactionRefundDefaultArgs,
   // TransactionRefundDynamicArgs
 } from 'pagarme';
 import type { Unarray, Optional } from './types/utils';
 import {
   mapTransactionStatusToPaymentStatus,
-  mapTransactionStatusToRefundStatus
+  mapPagarmeRefundStatusToVendureRefundStatus
 } from './utils';
 
 export type PagarmePaymentMethodMetadata = Omit<
-  Optional<CreateTransacaoInputBase, 'amount'>,
+  Optional<CreateTransactionInputBase, 'amount'>,
   | 'postback_url'
   | 'async'
   | 'capture'
@@ -28,11 +33,11 @@ export type PagarmePaymentMethodMetadata = Omit<
   | 'reference_key'
   | 'local_time'
 > &
-  (CreateTransacaoCreditCartInput | CreateTransacaoBoletoInput) & {
+  (CreateTransactionCreditCartInput | CreateTransactionBoletoInput) & {
     extraMetadata?: any;
     itemsExtraInfo?: Partial<
       Pick<
-        Unarray<CreateTransacaoInputBase['items']>,
+        Unarray<CreateTransactionInputBase['items']>,
         'venue' | 'tangible' | 'category'
       >
     > &
@@ -64,7 +69,8 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       description: [
         {
           languageCode: LanguageCode.en,
-          value: ''
+          value:
+            'Description that will appear on the invoice after your company name. Maximum of 13 characters, being alphanumeric and spaces.'
         },
         {
           languageCode: LanguageCode.pt_BR,
@@ -88,12 +94,11 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       description: [
         {
           languageCode: LanguageCode.en,
-          value: ''
+          value: 'Bill of exchange instructions field. 255 characters maximum'
         },
         {
           languageCode: LanguageCode.pt_BR,
-          value:
-            'Descrição que aparecerá na fatura depois do nome de sua empresa. Máximo de 13 caracteres, sendo alfanuméricos e espaços.'
+          value: 'Campo instruções do boleto. Máximo de 255 caracteres'
         }
       ]
     },
@@ -110,6 +115,11 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
         }
       ],
       description: [
+        {
+          languageCode: LanguageCode.en,
+          value:
+            'Deadline for payment of boleto. Must be passed in yyyy-MM-dd format'
+        },
         {
           languageCode: LanguageCode.pt_BR,
           value:
@@ -132,7 +142,7 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       description: [
         {
           languageCode: LanguageCode.en,
-          value: ''
+          value: 'Days after the ticket expires when the fine must be charged.'
         },
         {
           languageCode: LanguageCode.pt_BR,
@@ -156,7 +166,8 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       description: [
         {
           languageCode: LanguageCode.en,
-          value: ''
+          value:
+            'Value in cents of the fine. Maximum value of 2% of the document value.'
         },
         {
           languageCode: LanguageCode.pt_BR,
@@ -180,7 +191,8 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       description: [
         {
           languageCode: LanguageCode.en,
-          value: ''
+          value:
+            'Days after the expiration of the boleto when interest must be charged.'
         },
         {
           languageCode: LanguageCode.pt_BR,
@@ -204,7 +216,8 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       description: [
         {
           languageCode: LanguageCode.en,
-          value: ''
+          value:
+            'Percentage of the interest rate that will be charged per day. Maximum value of 1% per month.'
         },
         {
           languageCode: LanguageCode.pt_BR,
@@ -228,7 +241,8 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       description: [
         {
           languageCode: LanguageCode.en,
-          value: ''
+          value:
+            'Use false if you want to maintain synchronous processing for a transaction. That is, the transaction response is received on the spot.'
         },
         {
           languageCode: LanguageCode.pt_BR,
@@ -252,7 +266,8 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       description: [
         {
           languageCode: LanguageCode.en,
-          value: ''
+          value:
+            'After a transaction is authorized, you can choose whether to capture or postpone the capture of the amount. If you choose to postpone the capture, assign the value false.'
         },
         {
           languageCode: LanguageCode.pt_BR,
@@ -351,7 +366,7 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
     const pgClient = await pagarme.client.connect({ api_key: apiKey });
 
     try {
-      let transaction = await pgClient.transactions.find(
+      const transaction = await pgClient.transactions.find(
         {},
         { id: Number(payment.transactionId) }
       );
@@ -364,12 +379,10 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       // }
 
       if (transaction.payment_method === 'boleto') {
-        throw new Error(
-          'There is not a way to create refund of boleto transactions yet'
-        );
+        throw new IllegalOperationError('pagarme-plugin.errors.boleto-refund');
       }
 
-      transaction = await pgClient.transactions.refund(
+      await pgClient.transactions.refund(
         {},
         {
           // ...args,
@@ -379,10 +392,22 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
         }
       );
 
+      // We need to find  the last refund to get the data of it because in the transaction doesn't return required information
+      const refunds = await pgClient.refunds.find(
+        {},
+        {
+          transaction_id: String(transaction.id)
+        }
+      );
+
+      const refund = refunds[0];
+
       return {
-        state: mapTransactionStatusToRefundStatus(transaction.status)
+        state: mapPagarmeRefundStatusToVendureRefundStatus(refund.status),
+        transactionId: refund.id
       };
     } catch (e) {
+      Logger.error(e.message, 'PagarmePaymentHandler');
       return {
         state: 'Failed' as const,
         metadata: {
