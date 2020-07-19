@@ -2,6 +2,7 @@
 
 [![npm (scoped)](https://img.shields.io/npm/v/vendure-pagarme-plugin.svg)](https://www.npmjs.com/package/vendure-pagarme-plugin)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![Crowdin](https://badges.crowdin.net/vendure-pagarme-plugin/localized.svg)](https://crowdin.com/project/vendure-pagarme-plugin)
 
 💳 A plugin to enable Pagar.me as a payment provider for Vendure. Its a WORK IN PROGRESS. In issues you can find what need to be done.
 
