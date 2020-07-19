@@ -13,7 +13,7 @@
     "access": "public"
   },
   "scripts": {
-    "cp:i18n": "ncp src/i18n lib/src/i18n",
+    "cp:i18n": "ncp src/i18n lib/i18n",
     "cp": "npm run cp:i18n",
     "watch": "tsc --watch",
     "build": "rimraf lib && tsc && npm run cp",

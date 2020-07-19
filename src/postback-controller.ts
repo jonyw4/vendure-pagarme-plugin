@@ -12,7 +12,8 @@ import {
   RequestContext,
   LanguageCode,
   ChannelService,
-  PaymentMethodService
+  PaymentMethodService,
+  Logger
 } from '@vendure/core';
 import pagarme, { Postback } from 'pagarme';
 import qs from 'qs';
@@ -56,6 +57,7 @@ export class PagarmePostbackController {
       await this.handleRefundedTransaction();
       await this.handleNewTransactionStatus();
     } else {
+      Logger.error("Request doesn't have a signature or a postback");
       throw new Error("Request doesn't have a signature or a postback");
     }
   }
@@ -71,6 +73,7 @@ export class PagarmePostbackController {
         }
       });
     if (!paymentMethod) {
+      Logger.error('Pagarme is not configured as payment provider');
       throw new Error('Pagarme is not configured as payment provider');
     }
     const apiKey = paymentMethod.configArgs.find(
@@ -78,6 +81,7 @@ export class PagarmePostbackController {
     );
 
     if (!apiKey || !apiKey.value) {
+      Logger.error("There isn't a API key configured for Pagar.me");
       throw new Error("There isn't a API key configured for Pagar.me");
     }
     return apiKey.value;
@@ -94,6 +98,7 @@ export class PagarmePostbackController {
         signature
       )
     ) {
+      Logger.error("The request don't have a valid signature");
       throw new Error("The request don't have a valid signature");
     }
   }
@@ -108,6 +113,9 @@ export class PagarmePostbackController {
       relations: ['order', 'order.payments', 'refunds']
     });
     if (!payment) {
+      Logger.error(
+        "There isn't a payment related with the transaction ID from the postback"
+      );
       throw new Error(
         "There isn't a payment related with the transaction ID from the postback"
       );
