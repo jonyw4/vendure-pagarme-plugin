@@ -1,7 +1,7 @@
 {
   "pagarme-plugin": {
     "errors": {
-      "boleto-refund": "Não há como criar um estorno de uma transação de boleto ainda",
+      "boleto-refund": "There is no way to create a refund of a 'boleto' transaction yet",
       "transactions": {
         "1000": {
           "title": "Transação não autorizada",
