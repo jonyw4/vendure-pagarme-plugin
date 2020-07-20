@@ -10,8 +10,7 @@
 This plugin have inside it a lot of stuff:
 - A **[`PaymentMethodHandler`](https://www.vendure.io/docs/typescript-api/payment/payment-method-handler/) to createPayments** and configure Pagar.me transaction
 - A **`PagarmePostbackController` controller** to receive postback request from Pagar.me
-- A **[custom field](https://www.vendure.io/docs/developer-guide/customizing-models/#customizing-models-with-custom-fields) `pagarmePaymentMethod`** on Order
-- A **`changePagarmePaymentMethod` custom query on [Shop API](https://www.vendure.io/docs/storefront/shop-api-guide/)** to change the Pagar.me Payment Method BEFORE create a payment. You can define to calculate discount on Order based on that.
+- A **[custom field](https://www.vendure.io/docs/developer-guide/customizing-models/#customizing-models-with-custom-fields) `pagarmePaymentMethod`** on Order to change the Pagar.me Payment Method BEFORE create a payment. You can define to calculate discount on Order based on that.
 - A `pagarmeBoletoPromotionAction` and `pagarmeCreditCardPromotionAction` to create promotion based on what payment method selected by the user
 - Refund credit card payments in Admin UI
 
