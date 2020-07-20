@@ -1,7 +1,7 @@
 {
   "pagarme-plugin": {
     "errors": {
-      "boleto-refund": "There is not a way to create refund of boleto transactions yet",
+      "boleto-refund": "There is no way to create a refund of a 'boleto' transaction yet",
       "transactions": {
         "1000": {
           "title": "Transação não autorizada",
