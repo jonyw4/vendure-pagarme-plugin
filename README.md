@@ -6,18 +6,20 @@
 
 💳 A plugin to enable Pagar.me as a payment provider for Vendure. Its a WORK IN PROGRESS. In issues you can find what need to be done.
 
-## 🌟 Features
-- A Pagar.me `PaymentMethodHandler` to createPayments
-- A `PagarmePostbackController` controller to receive postback request from Pagar.me
-- Refund credit card payments
+## 🌟 Feature
+This plugin have inside it a lot of stuff:
+- A **[`PaymentMethodHandler`](https://www.vendure.io/docs/typescript-api/payment/payment-method-handler/) to createPayments** and configure Pagar.me transaction
+- A **`PagarmePostbackController` controller** to receive postback request from Pagar.me
+- A **[custom field](https://www.vendure.io/docs/developer-guide/customizing-models/#customizing-models-with-custom-fields) `pagarmePaymentMethod`** on Order
+- A **`changePagarmePaymentMethod` custom query on [Shop API](https://www.vendure.io/docs/storefront/shop-api-guide/)** to change the Pagar.me Payment Method BEFORE create a payment. You can define to calculate discount on Order based on that.
+- A `pagarmeBoletoPromotionAction` and `pagarmeCreditCardPromotionAction` to create promotion based on what payment method selected by the user
+- Refund credit card payments in Admin UI
 
-## Roadmap
-- Handle refund postback 
+## 🚩 Roadmap
 - Add unit and E2E test
 - Cronjob for cancel order after some time
-- A query route in Shop GQL to get transaction information in storefront
 - CRUD for save bank information for refund
-- CRUD for save credit card's ID
+- CRUD for save credit card's ID to create transactions based on that
 
 ## ⚙️ Install
 ### 1. Install and configure Vendure
