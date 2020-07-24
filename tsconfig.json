@@ -21,6 +21,7 @@
       "outDir": "./lib"
     },
     "include": [
-      "./src/**/*.ts"
+      "./src/**/*.ts",
+      "node_modules/pagarme-js-type/index.d.ts"
     ]
   }

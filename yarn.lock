@@ -7693,6 +7693,11 @@ pacote@^9.1.0, pacote@^9.5.12, pacote@^9.5.3:
     unique-filename "^1.1.1"
     which "^1.3.1"
 
+pagarme-js-type@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/pagarme-js-type/-/pagarme-js-type-1.0.1.tgz#e5d21644af0d2e45d8e9512d1ecf2583e690d8b5"
+  integrity sha512-MTij3pBTFVA8H7nvysIzHtaLea7gUHJhOVzJedgHi3kB+eB33Sqh/eoMDSegqM+KsHiXxF+xjIbob7N9imIB9g==
+
 pagarme@4.12.0:
   version "4.12.0"
   resolved "https://registry.yarnpkg.com/pagarme/-/pagarme-4.12.0.tgz#651f8644219766298a28ae215df958be6649141e"
