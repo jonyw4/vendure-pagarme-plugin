@@ -1639,7 +1639,7 @@
   dependencies:
     eslint-visitor-keys "^1.1.0"
 
-"@vendure/common@^0.16.1":
+"@vendure/common@^0.16.1", "@vendure/common@^0.16.2":
   version "0.16.2"
   resolved "https://registry.yarnpkg.com/@vendure/common/-/common-0.16.2.tgz#0639aac30db3e83ad77dcd54c85e919dfe6b7f26"
   integrity sha512-xyJIuadB6iOMXui/8vnrjFOZulM2qtvm7Vz5IkYipYCJwL21xsuhfLjoMMOPrh66G5yXOg0o5yhHlNrWunP3Tw==
@@ -1687,13 +1687,13 @@
     rxjs "^6.6.3"
     typeorm "0.2.28"
 
-"@vendure/testing@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@vendure/testing/-/testing-0.16.1.tgz#28f805a858842976bc519955242e77db3b581335"
-  integrity sha512-/orPIljaNjPYbHHlIkkN6MTxAqYaIo3rWazPiURWBKZ84zZu5vOUljOEqWBgUnnHYHu4HWN1N8IzwFXLpi3nlQ==
+"@vendure/testing@0.16.2":
+  version "0.16.2"
+  resolved "https://registry.yarnpkg.com/@vendure/testing/-/testing-0.16.2.tgz#f1f581d2927bca944b904dda7806936dc5f6764e"
+  integrity sha512-W6gFo5sU0QWZQrGUhKVUwa4/Ux6Us+J0+SsXnp8skTF3IkVWvEGvwFhPp+BwClO9+3PxNsDPQ0KMd3aaIslosA==
   dependencies:
     "@types/node-fetch" "^2.5.4"
-    "@vendure/common" "^0.16.1"
+    "@vendure/common" "^0.16.2"
     faker "^4.1.0"
     form-data "^3.0.0"
     graphql "15.3.0"
