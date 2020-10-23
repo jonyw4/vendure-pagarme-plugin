@@ -17,7 +17,7 @@ import {
 } from '@vendure/core';
 import pagarme, { Postback } from 'pagarme';
 import qs from 'qs';
-import { mapTransactionStatusToPaymentStatus } from './utils';
+import { getPaymentStateByPGTransactionStatus } from './utils';
 
 @Controller('pagarme-postback')
 export class PagarmePostbackController {
@@ -169,7 +169,7 @@ export class PagarmePostbackController {
    * Map all possible changes of status
    */
   private async handleNewTransactionStatus(): Promise<void> {
-    const status = mapTransactionStatusToPaymentStatus(
+    const status = getPaymentStateByPGTransactionStatus(
       this.postback.current_status
     );
     if (status !== this.payment.state) {

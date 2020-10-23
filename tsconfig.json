@@ -22,6 +22,6 @@
     },
     "include": [
       "./src/**/*.ts",
-      "node_modules/pagarme-js-type/index.d.ts"
+      "node_modules/pagarme-js-types/index.d.ts"
     ]
   }

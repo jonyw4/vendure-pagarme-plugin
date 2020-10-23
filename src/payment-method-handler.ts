@@ -7,41 +7,45 @@ import {
 import pagarme, {
   CreateTransactionCreditCartInput,
   CreateTransactionBoletoInput,
-  CreateTransactionInputBase
-  // TransactionRefundDefaultArgs,
-  // TransactionRefundDynamicArgs
+  CreateTransactionInputBase,
+  ItemInput
 } from 'pagarme';
-import type { Unarray, Optional } from './types/utils';
+import type { Optional } from './types/utils';
 import {
-  mapTransactionStatusToPaymentStatus,
-  mapPagarmeRefundStatusToVendureRefundStatus
+  getPaymentStateByPGTransactionStatus,
+  getRefundStateByPGRefundStatus
 } from './utils';
+
+export type PagarmeExtraItemInfo = Partial<
+  Pick<ItemInput, 'venue' | 'tangible' | 'category'>
+> & { id: string };
 
 export type PagarmePaymentMethodMetadata = Omit<
   Optional<CreateTransactionInputBase, 'amount'>,
   | 'postback_url'
   | 'async'
   | 'capture'
-  | 'boleto_expiration_date'
   | 'soft_descriptor'
-  | 'boleto_instructions'
-  | 'boleto_fine'
-  | 'boleto_interest'
   | 'split_rules'
   | 'items'
   | 'metadata'
   | 'reference_key'
   | 'local_time'
 > &
-  (CreateTransactionCreditCartInput | CreateTransactionBoletoInput) & {
-    extraMetadata?: any;
-    itemsExtraInfo?: Partial<
-      Pick<
-        Unarray<CreateTransactionInputBase['items']>,
-        'venue' | 'tangible' | 'category'
+  (
+    | CreateTransactionCreditCartInput
+    | Omit<
+        CreateTransactionBoletoInput,
+        | 'boleto_expiration_date'
+        | 'boleto_instructions'
+        | 'boleto_fine'
+        | 'boleto_interest'
       >
-    > &
-      { id: string }[];
+  ) & {
+    extraInfo?: {
+      metadata?: any;
+      items?: PagarmeExtraItemInfo[];
+    };
   };
 
 export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
@@ -50,8 +54,8 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
     apiKey: {
       type: 'string',
       label: [
-        { languageCode: LanguageCode.en, value: 'API Key' },
-        { languageCode: LanguageCode.pt_BR, value: 'Chave da API' }
+        { languageCode: LanguageCode.en, value: 'API Key v4' },
+        { languageCode: LanguageCode.pt_BR, value: 'Chave da API v4' }
       ]
     },
     soft_descriptor: {
@@ -288,32 +292,25 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       boletoInterestAmount,
       ...args
     },
-    { itemsExtraInfo, extraMetadata, ...metadata }: PagarmePaymentMethodMetadata
+    meta
   ) {
+    const { extraInfo, ...metadata } = meta as PagarmePaymentMethodMetadata;
     const amount = metadata.amount ? metadata.amount : order.total;
     const pgClient = await pagarme.client.connect({ api_key: apiKey });
 
     try {
       const transaction = await pgClient.transactions.create({
-        amount: amount,
+        amount,
         ...metadata,
-        items: order.lines.map((line) => {
-          let extraInfo: any = {};
-
-          if (itemsExtraInfo) {
-            const itemExtraInfo = itemsExtraInfo.find((i) => i.id === line.id);
-            extraInfo = itemExtraInfo ? itemExtraInfo : {};
-          }
-
-          return {
-            tangible: true,
-            ...extraInfo,
-            id: String(line.id),
-            title: line.productVariant.name,
-            unit_price: line.unitPrice,
-            quantity: line.quantity
-          };
-        }),
+        items: order.lines.map((line) => ({
+          tangible: true,
+          ...(extraInfo?.items &&
+            extraInfo?.items.find((i) => i.id === line.id)),
+          id: String(line.id),
+          title: line.productVariant.name,
+          unit_price: line.unitPrice,
+          quantity: line.quantity
+        })),
         boleto_fine: {
           days: boletoFineDays,
           amount: boletoFineAmount
@@ -324,13 +321,13 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
         },
         metadata: JSON.stringify({
           id: order.id,
-          ...extraMetadata
+          ...extraInfo?.metadata
         }),
         ...args
       });
       return {
         amount: amount,
-        state: mapTransactionStatusToPaymentStatus(transaction.status),
+        state: getPaymentStateByPGTransactionStatus(transaction.status),
         transactionId: String(transaction.id),
         errorMessage: transaction.acquirer_response_code
       };
@@ -350,7 +347,7 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
         id: payment.transactionId,
         amount: payment.amount
       });
-      const status = mapTransactionStatusToPaymentStatus(transaction.status);
+      const status = getPaymentStateByPGTransactionStatus(transaction.status);
       return {
         success: status === 'Settled',
         errorMessage: transaction.status_reason
@@ -403,7 +400,7 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
       const refund = refunds[0];
 
       return {
-        state: mapPagarmeRefundStatusToVendureRefundStatus(refund.status),
+        state: getRefundStateByPGRefundStatus(refund.status),
         transactionId: refund.id
       };
     } catch (e) {
