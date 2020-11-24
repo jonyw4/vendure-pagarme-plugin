@@ -28,7 +28,7 @@
   "dependencies": {
     "@types/qs": "6.9.3",
     "pagarme": "4.13.0",
-    "pagarme-js-types": "2.5.0",
+    "pagarme-js-types": "2.5.1",
     "qs": "6.9.4"
   },
   "devDependencies": {
