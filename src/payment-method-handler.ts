@@ -10,7 +10,7 @@ import pagarme, {
   CreateTransactionInputBase,
   ItemInput
 } from 'pagarme';
-import type { Optional } from './types/utils';
+import { Optional } from './types/utils';
 import {
   getPaymentStateByPGTransactionStatus,
   getRefundStateByPGRefundStatus
@@ -36,10 +36,7 @@ export type PagarmePaymentMethodMetadata = Omit<
     | CreateTransactionCreditCartInput
     | Omit<
         CreateTransactionBoletoInput,
-        | 'boleto_expiration_date'
-        | 'boleto_instructions'
-        | 'boleto_fine'
-        | 'boleto_interest'
+        'boleto_instructions' | 'boleto_fine' | 'boleto_interest'
       >
   ) & {
     extraInfo?: {
@@ -103,31 +100,6 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
         {
           languageCode: LanguageCode.pt_BR,
           value: 'Campo instruções do boleto. Máximo de 255 caracteres'
-        }
-      ]
-    },
-    boleto_expiration_date: {
-      type: 'string',
-      label: [
-        {
-          languageCode: LanguageCode.en,
-          value: 'Boleto - Expiration Date'
-        },
-        {
-          languageCode: LanguageCode.pt_BR,
-          value: 'Boleto - Prazo de Expiração'
-        }
-      ],
-      description: [
-        {
-          languageCode: LanguageCode.en,
-          value:
-            'Deadline for payment of boleto. Must be passed in yyyy-MM-dd format'
-        },
-        {
-          languageCode: LanguageCode.pt_BR,
-          value:
-            'Prazo limite para pagamento do boleto. Deve ser passado no formato yyyy-MM-dd'
         }
       ]
     },
@@ -283,6 +255,7 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
   },
   description: [{ languageCode: LanguageCode.en, value: 'Pagar.me' }],
   async createPayment(
+    ctx,
     order,
     {
       apiKey,
@@ -325,21 +298,30 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
         }),
         ...args
       });
+      const errorMessage = transaction.acquirer_response_code;
       return {
         amount: amount,
         state: getPaymentStateByPGTransactionStatus(transaction.status),
         transactionId: String(transaction.id),
-        errorMessage: transaction.acquirer_response_code
+        errorMessage,
+        metadata: {
+          errorMessage
+        }
       };
     } catch (e) {
+      const errorMessage = e.message;
+      Logger.error(errorMessage, 'PagarmePaymentHandler');
       return {
         amount: amount,
         state: 'Error' as const,
-        errorMessage: e.message
+        errorMessage,
+        metadata: {
+          errorMessage
+        }
       };
     }
   },
-  async settlePayment(_, payment, { apiKey }) {
+  async settlePayment(ctx, _, payment, { apiKey }) {
     const pgClient = await pagarme.client.connect({ api_key: apiKey });
 
     try {
@@ -353,13 +335,14 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
         errorMessage: transaction.status_reason
       };
     } catch (e) {
+      Logger.error(e.message, 'PagarmePaymentHandler');
       return {
         success: false,
         errorMessage: e.message
       };
     }
   },
-  async createRefund(input, total, order, payment, { apiKey, async }) {
+  async createRefund(ctx, input, total, order, payment, { apiKey, async }) {
     const pgClient = await pagarme.client.connect({ api_key: apiKey });
 
     try {

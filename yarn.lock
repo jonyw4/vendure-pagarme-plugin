@@ -1639,15 +1639,15 @@
   dependencies:
     eslint-visitor-keys "^1.1.0"
 
-"@vendure/common@^0.16.1":
-  version "0.16.2"
-  resolved "https://registry.yarnpkg.com/@vendure/common/-/common-0.16.2.tgz#0639aac30db3e83ad77dcd54c85e919dfe6b7f26"
-  integrity sha512-xyJIuadB6iOMXui/8vnrjFOZulM2qtvm7Vz5IkYipYCJwL21xsuhfLjoMMOPrh66G5yXOg0o5yhHlNrWunP3Tw==
+"@vendure/common@^0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@vendure/common/-/common-0.17.1.tgz#84b8208139864e44af203ea07e33353fe6c22cb1"
+  integrity sha512-kGOlsTMM0pOuD/hO3tc7iEOjj+8jumLn16qTV6yO5O/MMH8EHW3oMWcT/mAjy2jDsIqrMoNaDB24goHJFF6Dvg==
 
-"@vendure/core@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@vendure/core/-/core-0.16.1.tgz#7bc726cbc560458bdb5086abe732bc353af9444d"
-  integrity sha512-w7sfjm2V9qQhXbK8nJF7muYMtYP8ebloIVDJQPP2w5+IMqCmjuKvj6N2AWkwP5jRXL/VSX3Blz96l8sZZ5bzrA==
+"@vendure/core@0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@vendure/core/-/core-0.17.1.tgz#5671cc2f86a3c5b3d8a58c9f52dc6173f5cfc446"
+  integrity sha512-d8ijQosb5HgAzkDRv92Sur9ZcwrD7W4OIfoH8Uc02SnWCQqubJo+pBV8vEeGMlpgrmIPjtPKG2M0vxkvS1jp7w==
   dependencies:
     "@graphql-tools/stitch" "^6.2.4"
     "@nestjs/common" "7.4.4"
@@ -1659,7 +1659,7 @@
     "@nestjs/testing" "7.4.4"
     "@nestjs/typeorm" "7.1.3"
     "@types/fs-extra" "^9.0.1"
-    "@vendure/common" "^0.16.1"
+    "@vendure/common" "^0.17.1"
     apollo-server-express "2.18.1"
     bcrypt "^5.0.0"
     body-parser "^1.19.0"
@@ -1687,13 +1687,13 @@
     rxjs "^6.6.3"
     typeorm "0.2.28"
 
-"@vendure/testing@0.16.1":
-  version "0.16.1"
-  resolved "https://registry.yarnpkg.com/@vendure/testing/-/testing-0.16.1.tgz#28f805a858842976bc519955242e77db3b581335"
-  integrity sha512-/orPIljaNjPYbHHlIkkN6MTxAqYaIo3rWazPiURWBKZ84zZu5vOUljOEqWBgUnnHYHu4HWN1N8IzwFXLpi3nlQ==
+"@vendure/testing@0.17.1":
+  version "0.17.1"
+  resolved "https://registry.yarnpkg.com/@vendure/testing/-/testing-0.17.1.tgz#a24dde981a07fcc766849eb4f33e1c305c603955"
+  integrity sha512-ih0s+vSrqy6kTg3zUqWMEjj0uyKV7gVkbC8vydStv4k/POs5TC0UFbNlflBhTLODTrAiXwNwXrkcru0ezpK5xw==
   dependencies:
     "@types/node-fetch" "^2.5.4"
-    "@vendure/common" "^0.16.1"
+    "@vendure/common" "^0.17.1"
     faker "^4.1.0"
     form-data "^3.0.0"
     graphql "15.3.0"
@@ -7863,15 +7863,15 @@ pacote@^9.1.0, pacote@^9.5.12, pacote@^9.5.3:
     unique-filename "^1.1.1"
     which "^1.3.1"
 
-pagarme-js-types@2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/pagarme-js-types/-/pagarme-js-types-2.4.1.tgz#8e4df94e6726bc25d2a1cf012470ac940e0bc13d"
-  integrity sha512-lORZaTQLk4ucDt8BzamRinDwYrHPyC2ZTeYHVGSoz3BIeMj1QwFzQqi1eHy1YZEBPrzqd4tbqhWexyFhOMngAw==
+pagarme-js-types@2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/pagarme-js-types/-/pagarme-js-types-2.5.0.tgz#16ac1e16e80f4f9c5b37415fe59d14bc72d5f10b"
+  integrity sha512-p72/5N+qJRuxC9FN31lmWe5bPh06pseY/NlYYwRAcRxHb4dcudFPVDM5IQhfxdwvlsOhTZUK4GRfmdgV8Iwl1w==
 
-pagarme@4.12.0:
-  version "4.12.0"
-  resolved "https://registry.yarnpkg.com/pagarme/-/pagarme-4.12.0.tgz#651f8644219766298a28ae215df958be6649141e"
-  integrity sha512-YJkEZJHyZAPEMpAolE3T/f7jjGrJ5coFH4oqRe0q6ZG40ucYJRCX13J9z01p0cjgbGV+Ddo0LOq+HDfjItbu0A==
+pagarme@4.13.0:
+  version "4.13.0"
+  resolved "https://registry.yarnpkg.com/pagarme/-/pagarme-4.13.0.tgz#f15cd9186f5df6072acc82ce12834e7fef2f5b0e"
+  integrity sha512-5fOQTyw8pCbJvbqXdjlakKs2IU70vghcyalXZHMFSyO2vPJtzKpWbYnXC5EzAvF/zfNhRhuIIOGZZR4FAO4Vqw==
 
 parallel-transform@^1.1.0:
   version "1.2.0"
@@ -9876,10 +9876,10 @@ typeorm@0.2.28:
     yargonaut "^1.1.2"
     yargs "^16.0.3"
 
-typescript@3.8.3:
-  version "3.8.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.8.3.tgz#409eb8544ea0335711205869ec458ab109ee1061"
-  integrity sha512-MYlEfn5VrLNsgudQTVJeNaQFUAI7DkhnOjdpAp4T+ku1TfQClewlbSuTVHiA+8skNBgaf02TL/kLOvig4y3G8w==
+typescript@4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.0.3.tgz#153bbd468ef07725c1df9c77e8b453f8d36abba5"
+  integrity sha512-tEu6DGxGgRJPb/mVPIZ48e69xCn2yRmCgYmDugAVwmJ6o+0u1RI18eO7E7WBTLYLaEVVOhwQmcdhQHweux/WPg==
 
 typescript@~3.9.2:
   version "3.9.6"
