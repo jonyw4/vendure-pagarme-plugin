@@ -7,7 +7,7 @@ export const pagarmeBoletoPromotionAction = new PromotionOrderAction({
       type: 'int'
     }
   },
-  execute(order, args) {
+  execute(ctx, order, args) {
     // @ts-ignore
     const paymentMethod = order.customFields.pagarmePaymentMethod;
     if (paymentMethod && paymentMethod === 'boleto') {
@@ -36,7 +36,7 @@ export const pagarmeCreditCardPromotionAction = new PromotionOrderAction({
       type: 'int'
     }
   },
-  execute(order, args) {
+  execute(ctx, order, args) {
     // @ts-ignore
     const paymentMethod = order.customFields.pagarmePaymentMethod;
     if (paymentMethod && paymentMethod === 'credit_card') {
