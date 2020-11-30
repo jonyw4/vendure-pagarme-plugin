@@ -8,6 +8,7 @@ import pagarme, {
   CreateTransactionCreditCartInput,
   CreateTransactionBoletoInput,
   CreateTransactionInputBase,
+  CreateTransactionPixInput,
   ItemInput
 } from 'pagarme';
 import { Optional } from './types/utils';
@@ -38,6 +39,7 @@ export type PagarmePaymentMethodMetadata = Omit<
         CreateTransactionBoletoInput,
         'boleto_instructions' | 'boleto_fine' | 'boleto_interest'
       >
+    | CreateTransactionPixInput
   ) & {
     extraInfo?: {
       metadata?: any;
@@ -284,14 +286,18 @@ export const pagarmePaymentMethodHandler = new PaymentMethodHandler({
           unit_price: line.unitPrice,
           quantity: line.quantity
         })),
-        boleto_fine: {
-          days: boletoFineDays,
-          amount: boletoFineAmount
-        },
-        boleto_interest: {
-          days: boletoInterestDays,
-          amount: boletoInterestAmount
-        },
+        ...(metadata.payment_method === 'boleto'
+          ? {
+              boleto_fine: {
+                days: boletoFineDays,
+                amount: boletoFineAmount
+              },
+              boleto_interest: {
+                days: boletoInterestDays,
+                amount: boletoInterestAmount
+              }
+            }
+          : {}),
         metadata: JSON.stringify({
           id: order.id,
           ...extraInfo?.metadata
